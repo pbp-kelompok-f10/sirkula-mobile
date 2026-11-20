@@ -45,8 +45,8 @@ Pada tahap awal, Sirkula dikembangkan sebagai aplikasi web menggunakan Django. P
 
 Aplikasi mobile menggunakan backend Django dari [Sirkula Web App](https://github.com/pbp-kelompok-f10/sirkula). Endpoint Django REST Framework (DRF) memakai model dan database yang sama dengan situs web. Aplikasi mobile tidak mengakses database secara langsung.
 
-1. Pengguna melakukan tindakan di aplikasi Flutter, misalnya mencari produk atau memperbarui koleksi wardrobe.
-2. Flutter mengirim request HTTP ke API DRF dan menerima respons JSON. Untuk unggahan gambar, gunakan `multipart/form-data`.
+1. Pengguna melakukan tindakan di aplikasi Flutter, misalnya mencari produk atau melihat koleksi wardrobe.
+2. Flutter mengirim request HTTP ke API DRF dan menerima respons JSON.
 3. DRF mengautentikasi pengguna, memeriksa hak akses dan memvalidasi input sebelum menjalankan aturan bisnis Django.
 4. Backend membaca atau memperbarui database yang digunakan situs web. Perubahan dapat dilihat di platform lain setelah data dimuat ulang; tidak ada asumsi sinkronisasi real-time.
 5. Flutter mengolah respons atau kesalahan dan memperbarui tampilan. Data aplikasi harus diambil dan dikirim melalui endpoint, bukan disimpan sebagai data statis di dalam aplikasi.
@@ -64,6 +64,8 @@ Aplikasi mobile menggunakan backend Django dari [Sirkula Web App](https://github
 
 Fitur-fitur tersebut dikembangkan secara bertahap dan dapat mengalami penyesuaian selama proses implementasi.
 
+Aplikasi Flutter saat ini menyediakan halaman untuk ketujuh modul melalui navigation drawer. Marketplace mendukung pencarian dan detail produk; Discovery menampilkan hasil pencarian lokasi dan radius dalam daftar, belum berupa peta interaktif. Wardrobe, transaksi, dan barter menampilkan data pengguna; AI Stylist mendukung percakapan, sedangkan profil mendukung login dan logout. Operasi lain yang tersedia di API belum semuanya tersedia di aplikasi.
+
 ## 🛠️ Tech Stack
 
 Sirkula menggunakan arsitektur **client-server**, dengan Flutter sebagai mobile client dan Django REST Framework sebagai penyedia layanan backend.
@@ -74,13 +76,10 @@ Sirkula menggunakan arsitektur **client-server**, dengan Flutter sebagai mobile 
 |---|---|
 | **Flutter & Dart** | Framework utama pengembangan aplikasi mobile lintas platform. |
 | **Material Design 3** | Fondasi design system dan komponen antarmuka. |
-| **Riverpod 3** | State management dan dependency injection. |
-| **go_router** | Navigasi, nested routing, dan deep linking. |
-| **Dio** | HTTP client untuk komunikasi dengan REST API. |
-| **Freezed & json_serializable** | Immutable data models dan serialisasi JSON. |
+| **NavigationDrawer** | Navigasi antarhalaman modul. |
+| **http** | HTTP client untuk komunikasi dengan REST API. |
 | **flutter_secure_storage** | Penyimpanan kredensial autentikasi secara aman. |
-| **image_picker** | Pengambilan gambar melalui galeri dan kamera perangkat. |
-| **cached_network_image** | Pengelolaan cache gambar dari jaringan. |
+| **ChangeNotifier** | Memperbarui halaman saat status autentikasi berubah. |
 
 ### ⚙️ Backend & Infrastructure
 
@@ -88,21 +87,14 @@ Sirkula menggunakan arsitektur **client-server**, dengan Flutter sebagai mobile 
 |---|---|
 | **Python & Django** | Backend framework dan implementasi business logic. |
 | **Django REST Framework** | Penyedia REST API untuk aplikasi mobile. |
-| **PostgreSQL** | Database relasional utama. |
-| **PostGIS** | Dukungan spatial queries untuk pencarian berbasis lokasi. |
-| **drf-spectacular** | Dokumentasi dan spesifikasi OpenAPI. |
-| **S3-Compatible Storage** | Penyimpanan gambar produk dan koleksi wardrobe. |
-| **GitHub Actions** | Continuous integration, testing, dan otomatisasi build. |
+| **SQLite / PostgreSQL** | Database pengembangan lokal / produksi sesuai konfigurasi backend. |
 
 ### 🌍 Geospatial Services
 
 | Teknologi | Kegunaan |
 |---|---|
-| **MapLibre GL** | Rendering peta interaktif pada aplikasi mobile. |
-| **OpenFreeMap Liberty** | Vector map style berbasis data OpenStreetMap. |
-| **geolocator** | Akses lokasi geografis perangkat. |
+| **Discovery API** | Pencarian lokasi, produk dan toko berdasarkan radius melalui backend. |
 | **Nominatim-Compatible Geocoding** | Konversi alamat dan koordinat melalui backend. |
-| **GeoDjango & PostGIS** | Penyimpanan serta pencarian data spasial. |
 
 ### 🤖 AI Integration
 
@@ -117,10 +109,9 @@ Pendekatan ini menjaga kredensial layanan AI tetap berada di sisi server dan mem
 │             Flutter Mobile App          │
 │                                         │
 │  UI / Widgets       Material Design 3   │
-│  State Management   Riverpod            │
-│  Navigation         go_router           │
-│  Networking         Dio                 │
-│  Maps               MapLibre GL         │
+│  State              ChangeNotifier      │
+│  Navigation         NavigationDrawer    │
+│  Networking         http                │
 └─────────────────────┬───────────────────┘
                       │
                  HTTPS / JSON
@@ -138,15 +129,9 @@ Pendekatan ini menjaga kredensial layanan AI tetap berada di sisi server dan mem
              │                │
              ▼                ▼
 ┌──────────────────┐  ┌──────────────────┐
-│   PostgreSQL     │  │  Object Storage  │
-│   + PostGIS      │  │  S3-Compatible   │
+│ Database Django  │  │ Layanan eksternal │
+│ SQLite/PostgreSQL│  │ Geocoding / AI   │
 └──────────────────┘  └──────────────────┘
-             │
-             │ External Services
-             ▼
-┌─────────────────────────────────────────┐
-│  Geocoding / Geolocation / AI Inference │
-└─────────────────────────────────────────┘
 ```
 
 ### Architectural Principles
@@ -155,7 +140,6 @@ Pengembangan Sirkula mengikuti beberapa prinsip utama:
 
 - **Separation of Concerns:** Antarmuka, pengelolaan state, akses data, dan business logic dipisahkan berdasarkan tanggung jawabnya.
 - **Feature-First Architecture:** Modul Flutter diorganisasikan berdasarkan fitur untuk mempermudah pengembangan paralel.
-- **Repository Pattern:** Interaksi dengan API dan sumber data diabstraksikan melalui repository.
 - **API-Driven Development:** Komunikasi antara mobile client dan backend menggunakan REST API dengan kontrak yang terdokumentasi.
 - **Server-Side Business Logic:** Validasi dan aturan bisnis utama tetap dijalankan melalui Django.
 - **Secure by Design:** Kredensial sensitif tidak disimpan secara langsung pada source code aplikasi.
@@ -163,75 +147,37 @@ Pengembangan Sirkula mengikuti beberapa prinsip utama:
 ## 📁 Project Structure
 
 ```text
-sirkula/
-├── mobile/
-│   ├── android/
-│   ├── ios/
-│   ├── assets/
-│   ├── lib/
-│   │   ├── main.dart
-│   │   ├── app/
-│   │   │   ├── app.dart
-│   │   │   ├── router.dart
-│   │   │   └── theme/
-│   │   ├── core/
-│   │   │   ├── network/
-│   │   │   ├── storage/
-│   │   │   ├── errors/
-│   │   │   └── widgets/
-│   │   ├── features/
-│   │   │   ├── auth/
-│   │   │   ├── marketplace/
-│   │   │   ├── discovery/
-│   │   │   ├── transactions/
-│   │   │   ├── wardrobe/
-│   │   │   ├── stylist/
-│   │   │   └── profile/
-│   │   └── shared/
-│   ├── test/
-│   ├── integration_test/
-│   └── pubspec.yaml
-│
-├── backend/
-│   ├── apps/
-│   ├── main/
-│   ├── sirkula/
-│   ├── templates/
-│   ├── static/
-│   ├── manage.py
-│   ├── requirements.txt
-│   └── .env.example
-│
-├── .github/
-│   └── workflows/
-├── .gitignore
+sirkula-mobile/
+├── android/
+├── ios/
+├── web/
+├── lib/
+│   ├── main.dart
+│   ├── core/api_client.dart
+│   └── features/
+│       ├── marketplace/
+│       ├── discovery/
+│       ├── wardrobe/
+│       ├── stylist/
+│       ├── transactions/
+│       ├── bartering/
+│       └── profile/
+├── logo/
+├── test/
+├── pubspec.yaml
 └── README.md
 ```
 
-Setiap feature Flutter dapat dibagi menjadi tiga bagian utama:
-
-```text
-features/
-└── marketplace/
-    ├── data/
-    │   ├── models/
-    │   ├── repositories/
-    │   └── services/
-    ├── domain/
-    └── presentation/
-        ├── screens/
-        ├── widgets/
-        └── providers/
-```
+Backend Django berada di repositori `sirkula` yang terpisah. Setiap direktori fitur memuat halamannya sendiri, sedangkan `ApiClient` menyediakan komunikasi API dan status autentikasi bersama.
 
 ## 🚀 Installation
 
 ### Prerequisites
 - Git
-- Flutter SDK dan Dart SDK yang kompatibel
+- Flutter 3.47.9 dan Dart 3.13.7 atau versi yang kompatibel
 - Android Studio dan Android SDK
 - Python 3.11 atau lebih baru yang kompatibel dengan dependensi backend
-- PostgreSQL dan PostGIS, jika menjalankan database produksi secara lokal
+- PostgreSQL jika menggunakan konfigurasi database produksi
 - Editor seperti VS Code atau Android Studio
 
 Untuk menjalankan aplikasi pada iOS, diperlukan macOS dan Xcode.
@@ -246,13 +192,11 @@ flutter doctor
 Backend
 ```bash
 git clone https://github.com/pbp-kelompok-f10/sirkula.git
-cd sirkula
 ```
 
 Frontend
 ```bash
 git clone https://github.com/pbp-kelompok-f10/sirkula-mobile.git
-cd sirkula
 ```
 
 ### 2. Backend Setup
@@ -365,6 +309,10 @@ flutter run \
 
 Untuk perangkat fisik, gunakan alamat backend yang dapat diakses melalui jaringan perangkat tersebut. Pastikan konfigurasi Django `ALLOWED_HOSTS`, jaringan, dan kebijakan HTTP/HTTPS platform telah disesuaikan.
 
+Android emulator menggunakan `http://10.0.2.2:8000` secara default; platform lain menggunakan `http://127.0.0.1:8000`. HTTP hanya diizinkan pada build debug Android. Gunakan HTTPS untuk produksi dan atur kebijakan jaringan iOS bila menguji server HTTP lokal.
+
+Flutter Web memerlukan konfigurasi CORS di backend jika dijalankan pada origin yang berbeda. Backend PWS yang ada belum menyediakannya secara default.
+
 ### 4. Build Android Application
 
 Untuk menghasilkan APK:
@@ -439,11 +387,6 @@ Unit dan widget testing:
 flutter test
 ```
 
-Integration testing:
-
-```bash
-flutter test integration_test
-```
 
 ### Django
 
