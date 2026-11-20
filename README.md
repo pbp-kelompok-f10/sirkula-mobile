@@ -30,6 +30,27 @@ Proyek ini dikembangkan oleh **Kelompok F10** sebagai bagian dari mata kuliah **
 
 Pada tahap awal, Sirkula dikembangkan sebagai aplikasi web menggunakan Django. Pengembangan selanjutnya berfokus pada implementasi aplikasi mobile lintas platform menggunakan **Flutter**, dengan Django REST Framework sebagai backend API.
 
+## 👥 Peran Pengguna
+
+| Aktor | Peran dalam Sirkula |
+|---|---|
+| **Pengunjung** | Menjelajahi katalog, melihat detail produk, dan mencari produk atau toko melalui Discovery Map. Dapat mendaftar atau masuk untuk menggunakan fitur yang memerlukan akun. |
+| **Pembeli** | Mencari barang preloved dan melakukan pembelian serta melihat status dan riwayat transaksi. |
+| **Penjual** | Menambahkan dan mengelola produk miliknya, termasuk informasi dan ketersediaan barang. |
+| **Pengguna barter** | Menawarkan barang untuk ditukar dan menanggapi penawaran pertukaran. |
+| **Pemilik wardrobe** | Mengelola koleksi pakaian pribadi dan menggunakan AI Stylist untuk mengeksplorasi kombinasi outfit. |
+| **Administrator** | Mengelola data dan administrasi aplikasi melalui fasilitas administrasi Django sesuai hak aksesnya. |
+
+## 🔗 Integrasi Data Mobile dan Web PWS
+
+Aplikasi mobile menggunakan backend Django dari [Sirkula Web App](https://github.com/pbp-kelompok-f10/sirkula). Endpoint Django REST Framework (DRF) memakai model dan database yang sama dengan situs web. Aplikasi mobile tidak mengakses database secara langsung.
+
+1. Pengguna melakukan tindakan di aplikasi Flutter, misalnya mencari produk atau memperbarui koleksi wardrobe.
+2. Flutter mengirim request HTTP ke API DRF dan menerima respons JSON. Untuk unggahan gambar, gunakan `multipart/form-data`.
+3. DRF mengautentikasi pengguna, memeriksa hak akses dan memvalidasi input sebelum menjalankan aturan bisnis Django.
+4. Backend membaca atau memperbarui database yang digunakan situs web. Perubahan dapat dilihat di platform lain setelah data dimuat ulang; tidak ada asumsi sinkronisasi real-time.
+5. Flutter mengolah respons atau kesalahan dan memperbarui tampilan. Data aplikasi harus diambil dan dikirim melalui endpoint, bukan disimpan sebagai data statis di dalam aplikasi.
+
 ## Features
 
 | Modul | Deskripsi |
@@ -297,7 +318,7 @@ Backend secara default dapat diakses melalui:
 http://127.0.0.1:8000/
 ```
 
-REST API direncanakan tersedia melalui prefix:
+REST API tersedia melalui prefix:
 
 ```text
 /api/v1/
@@ -361,24 +382,44 @@ flutter build appbundle --release
 Build release memerlukan konfigurasi signing dan environment produksi yang sesuai sebelum didistribusikan.
 
 ## 🔌 API Integration
+Prefix: `/api/v1/`, di mana `{id}` adalah ID objek dan `{uuid}` adalah ID percakapan.
 
-Flutter menggunakan Django REST Framework sebagai sumber data utama untuk autentikasi, marketplace, wardrobe, transaksi, dan AI Stylist.
+| Modul | Method | Endpoint setelah `/api/v1/` | Kegunaan |
+|---|---|---|---|
+| Akun | `POST` | `accounts/register/`, `accounts/login/`, `accounts/logout/` | Registrasi, memperoleh token, dan mencabut token |
+| Profil | `GET`, `PUT`, `PATCH` | `accounts/profile/` | Membaca dan mengubah profil sendiri |
+| Marketplace | `GET` | `marketplace/products/`, `marketplace/products/{id}/` | Katalog dan detail produk |
+| Marketplace | `GET`, `POST` | `marketplace/my/products/` | Daftar dan tambah produk sendiri |
+| Marketplace | `GET`, `PUT`, `PATCH`, `DELETE` | `marketplace/my/products/{id}/` | Kelola produk sendiri |
+| Marketplace | `GET`, `POST` | `marketplace/my/products/{id}/images/` | Daftar dan tambah gambar galeri |
+| Marketplace | `GET`, `PUT`, `PATCH`, `DELETE` | `marketplace/my/products/{id}/images/{image_id}/` | Kelola gambar galeri |
+| Discovery Map | `GET` | `marketplace/map/locations/`, `marketplace/map/nearby/`, `marketplace/map/geocode/`, `marketplace/map/reverse-geocode/` | Lokasi, pencarian sekitar dan geocoding |
+| Discovery Map | `GET`, `POST` | `marketplace/map/saved-places/` | Daftar dan tambah tempat tersimpan |
+| Discovery Map | `GET`, `PUT`, `PATCH`, `DELETE` | `marketplace/map/saved-places/{id}/` | Kelola tempat tersimpan sendiri |
+| Wardrobe | `GET`, `POST` | `wardrobe/categories/`, `wardrobe/items/` | Daftar dan tambah kategori atau pakaian |
+| Wardrobe | `GET`, `PUT`, `PATCH`, `DELETE` | `wardrobe/categories/{id}/`, `wardrobe/items/{id}/` | Kelola kategori atau pakaian sendiri |
+| Wardrobe | `GET` | `wardrobe/photos/{id}/` | Mengambil foto privat yang diizinkan |
+| AI Stylist | `GET`, `POST` | `outfits/conversations/` | Daftar dan mulai percakapan |
+| AI Stylist | `GET` | `outfits/conversations/{uuid}/` | Detail percakapan sendiri |
+| AI Stylist | `POST` | `outfits/conversations/{uuid}/messages/` | Mengirim pesan |
+| AI Stylist | `GET`, `POST` | `outfits/conversations/{uuid}/preview/` | Memeriksa atau meminta preview |
+| AI Stylist | `GET` | `outfits/conversations/{uuid}/preview/image/` | Mengambil gambar preview |
+| Transaksi | `GET`, `DELETE` | `transactions/cart/` | Melihat atau mengosongkan keranjang |
+| Transaksi | `POST`, `DELETE` | `transactions/cart/items/{id}/` | Menambah atau menghapus produk di keranjang |
+| Transaksi | `POST` | `transactions/checkout/` | Membuat pesanan dan pembayaran |
+| Transaksi | `GET` | `transactions/orders/`, `transactions/orders/{id}/` | Daftar dan detail pesanan |
+| Transaksi | `POST` | `transactions/orders/{id}/status/`, `transactions/orders/{id}/payment-status/` | Memperbarui status atau memeriksa pembayaran |
+| Transaksi | `GET`, `POST` | `transactions/notifications/` (`GET`), `transactions/notifications/{id}/read/` (`POST`) | Notifikasi transaksi |
+| Barter | `GET`, `POST` | `bartering/offers/` | Daftar dan buat penawaran |
+| Barter | `GET` | `bartering/offers/{id}/`, `bartering/transactions/`, `bartering/transactions/{id}/` | Detail penawaran dan transaksi barter |
+| Barter | `POST` | `bartering/offers/{id}/{action}/` | Aksi `accept`, `reject`, `cancel`, `shipping`, atau `received` |
+| Ulasan | `GET`, `POST` | `core/reviews/` | Daftar dan buat ulasan |
+| Ulasan | `GET`, `PUT`, `PATCH`, `DELETE` | `core/reviews/{id}/` | Detail dan pengelolaan ulasan |
+| Ulasan | `PUT`, `DELETE` | `core/reviews/{id}/like/` | Menyukai atau membatalkan suka |
 
-Contoh rancangan endpoint:
+Login menerima `email` dan `password`, lalu mengembalikan `token`. Kirim `Authorization: Token <token>` pada request yang memerlukan autentikasi, gunakan HTTPS di prod dan pastikan token aman. Token DRF tidak memiliki masa kedaluwarsa bawaan dan satu akun menggunakan satu token. Session Django juga didukung dengan CSRF untuk request yang mengubah data.
 
-| Method | Endpoint | Deskripsi |
-|---|---|---|
-| `POST` | `/api/v1/auth/login/` | Autentikasi pengguna |
-| `GET` | `/api/v1/products/` | Mendapatkan daftar produk |
-| `GET` | `/api/v1/products/{id}/` | Mendapatkan detail produk |
-| `POST` | `/api/v1/products/` | Menambahkan produk |
-| `GET` | `/api/v1/discovery/` | Pencarian produk berdasarkan lokasi |
-| `GET` | `/api/v1/wardrobe/` | Mendapatkan koleksi pakaian |
-| `POST` | `/api/v1/wardrobe/` | Menambahkan pakaian |
-| `GET` | `/api/v1/transactions/` | Riwayat transaksi |
-| `POST` | `/api/v1/stylist/recommendations/` | Meminta rekomendasi outfit |
-
-Endpoint tersebut merupakan **rancangan API** dan dapat berubah mengikuti implementasi backend.
+Keranjang memakai session Django, sehingga klien harus mempertahankan cookie session selain token. Endpoint privat membatasi data berdasarkan pengguna atau perannya. Pencarian geocoding, pembayaran Midtrans, dan AI Stylist bergantung pada konfigurasi serta ketersediaan layanan eksternal.
 
 ## 🧪 Testing & Quality Assurance
 
