@@ -58,7 +58,9 @@ class _BarteringPageState extends State<BarteringPage> {
 
   List<dynamic> _list(dynamic response) {
     final data = response is List ? response : (response as Map)['results'];
-    if (data is! List) throw const FormatException('Respons barter tidak valid');
+    if (data is! List) {
+      throw const FormatException('Respons barter tidak valid');
+    }
     return data;
   }
 
@@ -98,13 +100,26 @@ class _BarteringPageState extends State<BarteringPage> {
   Widget build(BuildContext context) {
     Widget content;
     if (!_authenticated) {
-      content = const _Message(icon: Icons.lock_outline, title: 'Masuk untuk melihat barter', description: 'Silakan masuk melalui halaman akun terlebih dahulu.');
+      content = const _Message(
+        icon: Icons.lock_outline,
+        title: 'Masuk untuk melihat barter',
+        description: 'Silakan masuk melalui halaman akun terlebih dahulu.',
+      );
     } else if (_loading) {
       content = const Center(child: CircularProgressIndicator());
     } else if (_error != null) {
-      content = _Message(icon: Icons.error_outline, title: 'Barter tidak dapat dimuat', description: '$_error', onRetry: _load);
+      content = _Message(
+        icon: Icons.error_outline,
+        title: 'Barter tidak dapat dimuat',
+        description: '$_error',
+        onRetry: _load,
+      );
     } else if ((_offers?.isEmpty ?? true) && (_transactions?.isEmpty ?? true)) {
-      content = const _Message(icon: Icons.swap_horiz, title: 'Belum ada barter', description: 'Penawaran dan transaksi barter Anda akan muncul di sini.');
+      content = const _Message(
+        icon: Icons.swap_horiz,
+        title: 'Belum ada barter',
+        description: 'Penawaran dan transaksi barter Anda akan muncul di sini.',
+      );
     } else {
       content = RefreshIndicator(
         onRefresh: _load,
@@ -112,20 +127,38 @@ class _BarteringPageState extends State<BarteringPage> {
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Penawaran barter', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Penawaran barter',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
-            if (_offers!.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Belum ada penawaran barter.')),
-            for (final offer in _offers!) _OfferCard(offer: Map<String, dynamic>.from(offer as Map)),
+            if (_offers!.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Text('Belum ada penawaran barter.'),
+              ),
+            for (final offer in _offers!)
+              _OfferCard(offer: Map<String, dynamic>.from(offer as Map)),
             const SizedBox(height: 16),
-            Text('Transaksi barter', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'Transaksi barter',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 8),
-            if (_transactions!.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Text('Belum ada transaksi barter.')),
-            for (final transaction in _transactions!) _TransactionCard(transaction: Map<String, dynamic>.from(transaction as Map)),
+            if (_transactions!.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Text('Belum ada transaksi barter.'),
+              ),
+            for (final transaction in _transactions!)
+              _TransactionCard(
+                transaction: Map<String, dynamic>.from(transaction as Map),
+              ),
           ],
         ),
       );
     }
-    return Scaffold(appBar: AppBar(title: const Text('Barter')), body: content);
+    return Scaffold(body: content);
   }
 }
 
@@ -138,27 +171,40 @@ class _OfferCard extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 12),
     child: Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(children: [
-          Expanded(child: Text('Penawaran #${offer['id']}', style: Theme.of(context).textTheme.titleMedium)),
-          Chip(label: Text(_status('${offer['status']}'))),
-        ]),
-        const SizedBox(height: 8),
-        Text('Produk ditawarkan: #${offer['offered_product']}'),
-        Text('Produk diminta: #${offer['requested_product']}'),
-        if ((offer['message'] as String? ?? '').isNotEmpty) ...[
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Penawaran #${offer['id']}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Chip(label: Text(_status('${offer['status']}'))),
+            ],
+          ),
           const SizedBox(height: 8),
-          Text('Pesan: ${offer['message']}'),
+          Text('Produk ditawarkan: #${offer['offered_product']}'),
+          Text('Produk diminta: #${offer['requested_product']}'),
+          if ((offer['message'] as String? ?? '').isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text('Pesan: ${offer['message']}'),
+          ],
+          if ((offer['proposer_tracking_number'] as String? ?? '').isNotEmpty)
+            Text('Resi pengaju: ${offer['proposer_tracking_number']}'),
+          if ((offer['recipient_tracking_number'] as String? ?? '').isNotEmpty)
+            Text('Resi penerima: ${offer['recipient_tracking_number']}'),
+          if (offer['created_at'] != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Dibuat: ${_date(offer['created_at'])}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
         ],
-        if ((offer['proposer_tracking_number'] as String? ?? '').isNotEmpty)
-          Text('Resi pengaju: ${offer['proposer_tracking_number']}'),
-        if ((offer['recipient_tracking_number'] as String? ?? '').isNotEmpty)
-          Text('Resi penerima: ${offer['recipient_tracking_number']}'),
-        if (offer['created_at'] != null) ...[
-          const SizedBox(height: 8),
-          Text('Dibuat: ${_date(offer['created_at'])}', style: Theme.of(context).textTheme.bodySmall),
-        ],
-      ]),
+      ),
     ),
   );
 }
@@ -173,7 +219,9 @@ class _TransactionCard extends StatelessWidget {
     child: ListTile(
       leading: const Icon(Icons.swap_horiz),
       title: Text('Transaksi #${transaction['id']}'),
-      subtitle: Text('Penawaran #${transaction['offer']}\nDibuat: ${_date(transaction['created_at'])}${transaction['completed_at'] == null ? '' : '\nSelesai: ${_date(transaction['completed_at'])}'}'),
+      subtitle: Text(
+        'Penawaran #${transaction['offer']}\nDibuat: ${_date(transaction['created_at'])}${transaction['completed_at'] == null ? '' : '\nSelesai: ${_date(transaction['completed_at'])}'}',
+      ),
       isThreeLine: true,
     ),
   );
@@ -196,7 +244,12 @@ String _date(dynamic value) {
 }
 
 class _Message extends StatelessWidget {
-  const _Message({required this.icon, required this.title, required this.description, this.onRetry});
+  const _Message({
+    required this.icon,
+    required this.title,
+    required this.description,
+    this.onRetry,
+  });
   final IconData icon;
   final String title;
   final String description;
@@ -206,17 +259,27 @@ class _Message extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: Padding(
       padding: const EdgeInsets.all(24),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(height: 16),
-        Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Text(description, textAlign: TextAlign.center),
-        if (onRetry != null) ...[
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 16),
-          FilledButton.tonal(onPressed: onRetry, child: const Text('Coba lagi')),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(description, textAlign: TextAlign.center),
+          if (onRetry != null) ...[
+            const SizedBox(height: 16),
+            FilledButton.tonal(
+              onPressed: onRetry,
+              child: const Text('Coba lagi'),
+            ),
+          ],
         ],
-      ]),
+      ),
     ),
   );
 }

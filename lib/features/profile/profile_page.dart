@@ -67,7 +67,9 @@ class _ProfilePageState extends State<ProfilePage> {
     });
     try {
       final data = await widget.api.get('accounts/profile/');
-      if (data is! Map) throw const FormatException('Format profil tidak dikenali.');
+      if (data is! Map) {
+        throw const FormatException('Format profil tidak dikenali.');
+      }
       if (!mounted || request != _request) return;
       setState(() => _profile = Map<String, dynamic>.from(data));
     } catch (error) {
@@ -129,7 +131,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -149,19 +150,36 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.account_circle_outlined, size: 56, color: theme.colorScheme.primary),
+            Icon(
+              Icons.account_circle_outlined,
+              size: 56,
+              color: theme.colorScheme.primary,
+            ),
             const SizedBox(height: 20),
-            Text('Masuk ke Sirkula', style: theme.textTheme.headlineSmall, textAlign: TextAlign.center),
+            Text(
+              'Masuk ke Sirkula',
+              style: theme.textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
-            Text('Masuk untuk melihat profil dan menggunakan akunmu.', style: theme.textTheme.bodyMedium, textAlign: TextAlign.center),
+            Text(
+              'Masuk untuk melihat profil dan menggunakan akunmu.',
+              style: theme.textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 28),
             TextFormField(
               controller: _email,
               enabled: !_submitting,
               keyboardType: TextInputType.emailAddress,
               autofillHints: const [AutofillHints.email],
-              decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
-              validator: (value) => (value == null || value.trim().isEmpty) ? 'Masukkan email.' : null,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) => (value == null || value.trim().isEmpty)
+                  ? 'Masukkan email.'
+                  : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -169,17 +187,28 @@ class _ProfilePageState extends State<ProfilePage> {
               enabled: !_submitting,
               obscureText: _obscurePassword,
               autofillHints: const [AutofillHints.password],
-              onFieldSubmitted: (_) { if (!_submitting) _login(); },
+              onFieldSubmitted: (_) {
+                if (!_submitting) _login();
+              },
               decoration: InputDecoration(
                 labelText: 'Kata sandi',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  tooltip: _obscurePassword ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi',
-                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                  icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                  tooltip: _obscurePassword
+                      ? 'Tampilkan kata sandi'
+                      : 'Sembunyikan kata sandi',
+                  onPressed: () =>
+                      setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
+                  ),
                 ),
               ),
-              validator: (value) => (value == null || value.isEmpty) ? 'Masukkan kata sandi.' : null,
+              validator: (value) => (value == null || value.isEmpty)
+                  ? 'Masukkan kata sandi.'
+                  : null,
             ),
             if (_error != null) ...[
               const SizedBox(height: 16),
@@ -205,11 +234,20 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_error ?? 'Profil belum tersedia.', textAlign: TextAlign.center),
+              Text(
+                _error ?? 'Profil belum tersedia.',
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 16),
-              FilledButton.tonal(onPressed: _loadProfile, child: const Text('Coba lagi')),
+              FilledButton.tonal(
+                onPressed: _loadProfile,
+                child: const Text('Coba lagi'),
+              ),
               const SizedBox(height: 8),
-              TextButton(onPressed: _submitting ? null : _logout, child: const Text('Keluar')),
+              TextButton(
+                onPressed: _submitting ? null : _logout,
+                child: const Text('Keluar'),
+              ),
             ],
           ),
         ),
@@ -218,9 +256,13 @@ class _ProfilePageState extends State<ProfilePage> {
     final displayName = _value('display_name');
     final fullName = _value('full_name');
     final username = _value('username');
-    final name = displayName.isNotEmpty ? displayName : (fullName.isNotEmpty ? fullName : username);
+    final name = displayName.isNotEmpty
+        ? displayName
+        : (fullName.isNotEmpty ? fullName : username);
     final avatar = _value('avatar');
-    final avatarUrl = avatar.isEmpty ? null : Uri.tryParse(widget.api.baseUrl)?.resolve(avatar).toString();
+    final avatarUrl = avatar.isEmpty
+        ? null
+        : Uri.tryParse(widget.api.baseUrl)?.resolve(avatar).toString();
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -232,10 +274,18 @@ class _ProfilePageState extends State<ProfilePage> {
           child: const Icon(Icons.person_outline, size: 40),
         ),
         const SizedBox(height: 16),
-        Text(name.isEmpty ? 'Profil' : name, textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
+        Text(
+          name.isEmpty ? 'Profil' : name,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.headlineSmall,
+        ),
         if (_value('email').isNotEmpty) ...[
           const SizedBox(height: 4),
-          Text(_value('email'), textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+          Text(
+            _value('email'),
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium,
+          ),
         ],
         const SizedBox(height: 28),
         Text('Informasi profil', style: theme.textTheme.titleMedium),

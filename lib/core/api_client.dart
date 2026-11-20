@@ -60,19 +60,25 @@ class ApiClient extends ChangeNotifier {
     };
     late final http.Response response;
     try {
-      response = await (method == 'GET'
-              ? _client.get(uri, headers: headers)
-              : _client.post(uri, headers: headers, body: jsonEncode(data)))
-          .timeout(const Duration(seconds: 20));
+      response =
+          await (method == 'GET'
+                  ? _client.get(uri, headers: headers)
+                  : _client.post(uri, headers: headers, body: jsonEncode(data)))
+              .timeout(const Duration(seconds: 20));
     } catch (_) {
-      throw const ApiException('Tidak dapat terhubung ke server. Periksa koneksi dan alamat API.');
+      throw const ApiException(
+        'Tidak dapat terhubung ke server. Periksa koneksi dan alamat API.',
+      );
     }
     dynamic body;
     if (response.body.isNotEmpty) {
       try {
         body = jsonDecode(utf8.decode(response.bodyBytes));
       } on FormatException {
-        throw ApiException('Respons server tidak valid.', statusCode: response.statusCode);
+        throw ApiException(
+          'Respons server tidak valid.',
+          statusCode: response.statusCode,
+        );
       }
     }
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -85,7 +91,10 @@ class ApiClient extends ChangeNotifier {
   }
 
   Future<void> login(String email, String password) async {
-    final result = await post('accounts/login/', {'email': email, 'password': password});
+    final result = await post('accounts/login/', {
+      'email': email,
+      'password': password,
+    });
     final token = result is Map ? result['token'] : null;
     if (token is! String || token.isEmpty) {
       throw const ApiException('Respons login tidak memiliki token.');

@@ -63,7 +63,9 @@ class _TransactionsPageState extends State<TransactionsPage> {
     try {
       final response = await api.get('transactions/orders/');
       final data = response is List ? response : (response as Map)['results'];
-      if (data is! List) throw const FormatException('Respons pesanan tidak valid');
+      if (data is! List) {
+        throw const FormatException('Respons pesanan tidak valid');
+      }
       if (!mounted || api != widget.api || request != _request) return;
       setState(() => _orders = data);
     } catch (error) {
@@ -86,13 +88,27 @@ class _TransactionsPageState extends State<TransactionsPage> {
   Widget build(BuildContext context) {
     Widget content;
     if (!_authenticated) {
-      content = const _Message(icon: Icons.lock_outline, title: 'Masuk untuk melihat pesanan', description: 'Silakan masuk melalui halaman akun terlebih dahulu.');
+      content = const _Message(
+        icon: Icons.lock_outline,
+        title: 'Masuk untuk melihat pesanan',
+        description: 'Silakan masuk melalui halaman akun terlebih dahulu.',
+      );
     } else if (_loading) {
       content = const Center(child: CircularProgressIndicator());
     } else if (_error != null) {
-      content = _Message(icon: Icons.error_outline, title: 'Pesanan tidak dapat dimuat', description: '$_error', onRetry: _load);
+      content = _Message(
+        icon: Icons.error_outline,
+        title: 'Pesanan tidak dapat dimuat',
+        description: '$_error',
+        onRetry: _load,
+      );
     } else if (_orders == null || _orders!.isEmpty) {
-      content = const _Message(icon: Icons.receipt_long_outlined, title: 'Belum ada pesanan', description: 'Pesanan pembelian dan penjualan Anda akan muncul di sini.');
+      content = const _Message(
+        icon: Icons.receipt_long_outlined,
+        title: 'Belum ada pesanan',
+        description:
+            'Pesanan pembelian dan penjualan Anda akan muncul di sini.',
+      );
     } else {
       content = RefreshIndicator(
         onRefresh: _load,
@@ -107,32 +123,52 @@ class _TransactionsPageState extends State<TransactionsPage> {
               margin: const EdgeInsets.only(bottom: 12),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    Expanded(child: Text('${order['order_number']}', style: Theme.of(context).textTheme.titleMedium)),
-                    Chip(label: Text(_status('${order['status']}'))),
-                  ]),
-                  const SizedBox(height: 8),
-                  Text('${items.length} barang · Total Rp ${order['total']}'),
-                  const SizedBox(height: 4),
-                  Text('Pengiriman: ${order['shipping_method']} · Pembayaran: ${order['payment_status']}'),
-                  if (order['created_at'] != null) ...[
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${order['order_number']}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        Chip(label: Text(_status('${order['status']}'))),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text('${items.length} barang · Total Rp ${order['total']}'),
                     const SizedBox(height: 4),
-                    Text('Dibuat: ${_date(order['created_at'])}', style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      'Pengiriman: ${order['shipping_method']} · Pembayaran: ${order['payment_status']}',
+                    ),
+                    if (order['created_at'] != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Dibuat: ${_date(order['created_at'])}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                    if (items.isNotEmpty) ...[
+                      const Divider(height: 24),
+                      for (final item in items)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4),
+                          child: Text(
+                            'Produk #${item['product']} · Rp ${item['price']}',
+                          ),
+                        ),
+                    ],
                   ],
-                  if (items.isNotEmpty) ...[
-                    const Divider(height: 24),
-                    for (final item in items)
-                      Padding(padding: const EdgeInsets.only(bottom: 4), child: Text('Produk #${item['product']} · Rp ${item['price']}')),
-                  ],
-                ]),
+                ),
               ),
             );
           },
         ),
       );
     }
-    return Scaffold(appBar: AppBar(title: const Text('Pesanan')), body: content);
+    return Scaffold(body: content);
   }
 }
 
@@ -152,7 +188,12 @@ String _date(dynamic value) {
 }
 
 class _Message extends StatelessWidget {
-  const _Message({required this.icon, required this.title, required this.description, this.onRetry});
+  const _Message({
+    required this.icon,
+    required this.title,
+    required this.description,
+    this.onRetry,
+  });
   final IconData icon;
   final String title;
   final String description;
@@ -162,17 +203,27 @@ class _Message extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: Padding(
       padding: const EdgeInsets.all(24),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(height: 16),
-        Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Text(description, textAlign: TextAlign.center),
-        if (onRetry != null) ...[
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 48, color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 16),
-          FilledButton.tonal(onPressed: onRetry, child: const Text('Coba lagi')),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(description, textAlign: TextAlign.center),
+          if (onRetry != null) ...[
+            const SizedBox(height: 16),
+            FilledButton.tonal(
+              onPressed: onRetry,
+              child: const Text('Coba lagi'),
+            ),
+          ],
         ],
-      ]),
+      ),
     ),
   );
 }

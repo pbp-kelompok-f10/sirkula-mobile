@@ -75,12 +75,36 @@ class _AppShellState extends State<AppShell> {
   int _selected = 0;
 
   static const _destinations = [
-    (label: 'Marketplace', icon: Icons.storefront_outlined, selected: Icons.storefront),
-    (label: 'Discovery Map', icon: Icons.explore_outlined, selected: Icons.explore),
-    (label: 'Wardrobe', icon: Icons.checkroom_outlined, selected: Icons.checkroom),
-    (label: 'AI Stylist', icon: Icons.auto_awesome_outlined, selected: Icons.auto_awesome),
-    (label: 'Transaksi', icon: Icons.receipt_long_outlined, selected: Icons.receipt_long),
-    (label: 'Barter', icon: Icons.swap_horiz_outlined, selected: Icons.swap_horiz),
+    (
+      label: 'Marketplace',
+      icon: Icons.storefront_outlined,
+      selected: Icons.storefront,
+    ),
+    (
+      label: 'Discovery Map',
+      icon: Icons.explore_outlined,
+      selected: Icons.explore,
+    ),
+    (
+      label: 'Wardrobe',
+      icon: Icons.checkroom_outlined,
+      selected: Icons.checkroom,
+    ),
+    (
+      label: 'AI Stylist',
+      icon: Icons.auto_awesome_outlined,
+      selected: Icons.auto_awesome,
+    ),
+    (
+      label: 'Transaksi',
+      icon: Icons.receipt_long_outlined,
+      selected: Icons.receipt_long,
+    ),
+    (
+      label: 'Barter',
+      icon: Icons.swap_horiz_outlined,
+      selected: Icons.swap_horiz,
+    ),
     (label: 'Profil', icon: Icons.person_outline, selected: Icons.person),
   ];
 
@@ -121,9 +145,16 @@ class _AppShellState extends State<AppShell> {
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image(image: AssetImage('logo/sirkula.png'), width: 150, semanticLabel: 'Sirkula'),
+                Image(
+                  image: AssetImage('logo/sirkula.png'),
+                  width: 150,
+                  semanticLabel: 'Sirkula',
+                ),
                 SizedBox(height: 12),
-                Text('Berputar kembali, lebih berarti.', style: TextStyle(color: Colors.white)),
+                Text(
+                  'Berputar kembali, lebih berarti.',
+                  style: TextStyle(color: Colors.white),
+                ),
               ],
             ),
           ),
