@@ -441,13 +441,13 @@ Sirkula menerapkan beberapa prinsip keamanan untuk melindungi data dan aktivitas
 
 ## 👥 Development Team
 
-| Nama | NPM | Tanggung Jawab Sebelumnya |
+| Nama | NPM | Pembagian Modul |
 |---|---|---|
-| **Zayyan Ramadzaki Firdaus** | 2506550955 | Discovery Map dan integrasi layanan lokasi |
-| **Rayyan Raditia Pramana** | 2506598955 | Homepage, dataset fashion, dan integrasi AI |
-| **Ilman Ghani Awliya** | 2506656803 | Marketplace, transaksi, barter, dan desain antarmuka |
-| **Farel Boston Corinthians Nadeak** | 2506548490 | Personal Wardrobe dan integrasi rekomendasi outfit |
-| **Marwa Muhlashon** | 2506552714 | Profil pengguna dan desain UI/UX |
+| **Zayyan Ramadzaki Firdaus** | 2506550955 | Marketplace dan Discovery Map |
+| **Rayyan Raditia Pramana** | 2506598955 | Transcations dan Outfits |
+| **Ilman Ghani Awliya** | 2506656803 | Bartering Systems |
+| **Farel Boston Corinthians Nadeak** | 2506548490 | Wardrobe |
+| **Marwa Muhlashon** | 2506552714 | Accounts dan Profile |
 
 ## 🎯 Target Users
 
