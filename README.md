@@ -294,22 +294,15 @@ Jalankan aplikasi:
 flutter run
 ```
 
-Untuk Android Emulator, backend yang berjalan pada komputer host umumnya dapat diakses melalui:
-
-```text
-http://10.0.2.2:8000
-```
-
-Alamat backend dikonfigurasikan melalui Dart environment:
+Secara default, aplikasi menggunakan backend PWS di `https://zayyan-ramadzaki-sirkula.pws.cs.ui.ac.id`. Untuk menggunakan backend lokal pada Android Emulator, ubah alamat melalui Dart environment:
 
 ```bash
 flutter run \
   --dart-define=API_BASE_URL=http://10.0.2.2:8000
 ```
 
-Untuk perangkat fisik, gunakan alamat backend yang dapat diakses melalui jaringan perangkat tersebut. Pastikan konfigurasi Django `ALLOWED_HOSTS`, jaringan, dan kebijakan HTTP/HTTPS platform telah disesuaikan.
+Untuk perangkat fisik, gunakan alamat backend yang dapat diakses melalui jaringan perangkat tersebut. Pastikan konfigurasi Django `ALLOWED_HOSTS`, jaringan, dan kebijakan HTTP/HTTPS platform telah disesuaikan. HTTP lokal diizinkan pada build debug Android; gunakan HTTPS untuk produksi.
 
-Android emulator menggunakan `http://10.0.2.2:8000` secara default; platform lain menggunakan `http://127.0.0.1:8000`. HTTP hanya diizinkan pada build debug Android. Gunakan HTTPS untuk produksi dan atur kebijakan jaringan iOS bila menguji server HTTP lokal.
 
 Flutter Web memerlukan konfigurasi CORS di backend jika dijalankan pada origin yang berbeda. Backend PWS yang ada belum menyediakannya secara default.
 

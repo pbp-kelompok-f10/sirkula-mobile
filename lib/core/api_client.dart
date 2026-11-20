@@ -23,17 +23,12 @@ class ApiClient extends ChangeNotifier {
   final FlutterSecureStorage _storage;
   String? _token;
 
-  static const _configuredBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static const _configuredBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://zayyan-ramadzaki-sirkula.pws.cs.ui.ac.id',
+  );
 
-  String get baseUrl {
-    if (_configuredBaseUrl.isNotEmpty) {
-      return _configuredBaseUrl.replaceFirst(RegExp(r'/+$'), '');
-    }
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:8000';
-    }
-    return 'http://127.0.0.1:8000';
-  }
+  String get baseUrl => _configuredBaseUrl.replaceFirst(RegExp(r'/+$'), '');
 
   bool get isAuthenticated => _token != null;
 

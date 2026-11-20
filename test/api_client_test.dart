@@ -16,6 +16,8 @@ void main() {
       final paths = <String>[];
       final client = ApiClient(
         client: MockClient((request) async {
+          expect(request.url.scheme, 'https');
+          expect(request.url.host, 'zayyan-ramadzaki-sirkula.pws.cs.ui.ac.id');
           paths.add(request.url.path);
           if (request.url.path.endsWith('/accounts/login/')) {
             expect(jsonDecode(request.body), {
